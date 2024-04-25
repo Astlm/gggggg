@@ -28,7 +28,8 @@ jobs:
       # Step 4: Filter and modify AI.yaml
       - name: Process AI.yaml
         run: |
-          sed -i '/^.*IP-CIDR[^,]*,/ s/, no-resolve//' AI.yaml
+          sed -i 's/ //g' AI.yaml
+          sed -i '/^.*IP-CIDR[^,]*,/ s/,no-resolve//' AI.yaml
 
       # Step 5: Convert AI.yaml using sing-srs-converter
       - name: Convert AI.yaml
