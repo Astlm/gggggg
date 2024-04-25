@@ -1,0 +1,45 @@
+name: Process and Convert AI List
+
+on:
+  workflow_dispatch:
+
+  schedule:
+    - cron: '0 22 * * *'
+
+jobs:
+  download-and-process:
+    runs-on: ubuntu-latest
+    steps:
+      # Step 1: Checkout repo
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      # Step 2: Download AI.list and save as AI.yaml
+      - name: Download AI.list
+        run: |
+          curl -L "https://gitlab.com/lodepuly/vpn_tool/-/raw/master/Tool/Loon/Rule/AI.list" -o AI.yaml
+
+      # Step 3: Download sing-srs-converter
+      - name: Download sing-srs-converter
+        run: |
+          curl -L "https://github.com/PuerNya/sing-srs-converter/releases/download/v2.0.1/sing-srs-converter-v2.0.1-linux-x86_64" -o sing-srs-converter
+          chmod +x sing-srs-converter
+
+      # Step 4: Filter and modify AI.yaml
+      - name: Process AI.yaml
+        run: |
+          sed -i '/^.*IP-CIDR[^,]*,/ s/, no-resolve//' AI.yaml
+
+      # Step 5: Convert AI.yaml using sing-srs-converter
+      - name: Convert AI.yaml
+        run: |
+          ./sing-srs-converter AI.yaml
+
+      # Step 6: Commit and push changes
+      - name: Commit files
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add AI.srs AI.json
+          git commit -m "Update converted files"
+          git push
