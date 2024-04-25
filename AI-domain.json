@@ -1,0 +1,42 @@
+{
+  "version": 1,
+  "rules": [
+    {
+      "domain": [
+        "chatgpt.com",
+        "oaistatic.com",
+        "oaiusercontent.com",
+        "openai.com",
+        "api.statsig.com",
+        "api-iam.intercom.io",
+        "chatgpt.livekit.cloud",
+        "o33249.ingest.sentry.io",
+        "openaiapi-site.azureedge.net",
+        "sfo3.turn.livekit.cloud",
+        "api.githubcopilot.com",
+        "copilot-proxy.githubusercontent.com",
+        "copilot.microsoft.com",
+        "sydney.bing.com",
+        "www.bing.com",
+        "bard.google.com",
+        "gemini.google.com",
+        "anthropic.com",
+        "claude.ai",
+        "grazie.ai",
+        "imagine.meta.com",
+        "meta.ai"
+      ],
+      "domain_suffix": [
+        ".chatgpt.com",
+        ".oaistatic.com",
+        ".oaiusercontent.com",
+        ".openai.com",
+        ".anthropic.com",
+        ".claude.ai",
+        ".grazie.ai",
+        ".meta.ai"
+      ],
+      "domain_keyword": "openaicom"
+    }
+  ]
+}
