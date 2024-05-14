@@ -3,16 +3,17 @@
   "rules": [
     {
       "domain": [
+        "chat.openai.com.cdn.cloudflare.net",
+        "o33249.ingest.sentry.io",
+        "openaiapi-site.azureedge.net",
+        "openaicom-api-bdcpf8c6d2e9atf6.z01.azurefd.net",
+        "openaicom.imgix.net",
+        "openaicomproductionae4b.blob.core.windows.net",
+        "production-openaicom-storage.azureedge.net",
         "chatgpt.com",
         "oaistatic.com",
         "oaiusercontent.com",
         "openai.com",
-        "api.statsig.com",
-        "api-iam.intercom.io",
-        "chatgpt.livekit.cloud",
-        "o33249.ingest.sentry.io",
-        "openaiapi-site.azureedge.net",
-        "sfo3.turn.livekit.cloud",
         "api.githubcopilot.com",
         "copilot-proxy.githubusercontent.com",
         "copilot.microsoft.com",
@@ -35,8 +36,7 @@
         ".claude.ai",
         ".grazie.ai",
         ".meta.ai"
-      ],
-      "domain_keyword": "openaicom"
+      ]
     }
   ]
 }
