@@ -23,12 +23,14 @@
         "gemini.google.com",
         "generativelanguage.googleapis.com",
         "ai.google.dev",
+        "aida.googleapis.com",
         "aistudio.google.com",
         "alkalimakersuite-pa.clients6.google.com",
         "makersuite.google.com",
         "anthropic.com",
         "claude.ai",
         "grazie.ai",
+        "grazie.aws.intellij.net",
         "imagine.meta.com",
         "meta.ai"
       ],
@@ -40,6 +42,7 @@
         ".anthropic.com",
         ".claude.ai",
         ".grazie.ai",
+        ".grazie.aws.intellij.net",
         ".meta.ai"
       ]
     }
