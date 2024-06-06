@@ -41,6 +41,7 @@ jobs:
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
-          git add *.srs *.json
-          git commit -m "Update converted files"
+          git add .  # 修改这里，添加所有更改
+          git status  # 可选，打印状态以便调试
+          git commit -m "Update converted files" || echo "No changes to commit"  # 如果没有更改，则不会出错
           git push
