@@ -32,7 +32,8 @@
         "grazie.ai",
         "grazie.aws.intellij.net",
         "imagine.meta.com",
-        "meta.ai"
+        "meta.ai",
+        "perplexity.ai"
       ],
       "domain_suffix": [
         ".chatgpt.com",
@@ -43,7 +44,8 @@
         ".claude.ai",
         ".grazie.ai",
         ".grazie.aws.intellij.net",
-        ".meta.ai"
+        ".meta.ai",
+        ".perplexity.ai"
       ]
     }
   ]
