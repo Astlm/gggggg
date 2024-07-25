@@ -6,7 +6,6 @@
         "chat.openai.com.cdn.cloudflare.net",
         "o33249.ingest.sentry.io",
         "openaiapi-site.azureedge.net",
-        "openaicom-api-bdcpf8c6d2e9atf6.z01.azurefd.net",
         "openaicom.imgix.net",
         "openaicomproductionae4b.blob.core.windows.net",
         "production-openaicom-storage.azureedge.net",
@@ -33,7 +32,10 @@
         "grazie.aws.intellij.net",
         "imagine.meta.com",
         "meta.ai",
-        "perplexity.ai"
+        "perplexity.ai",
+        "chat.mistral.ai",
+        "console.mistral.ai",
+        "mistral.ai"
       ],
       "domain_suffix": [
         ".chatgpt.com",
@@ -45,7 +47,8 @@
         ".grazie.ai",
         ".grazie.aws.intellij.net",
         ".meta.ai",
-        ".perplexity.ai"
+        ".perplexity.ai",
+        ".mistral.ai"
       ]
     }
   ]
