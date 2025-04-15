@@ -1,47 +1,116 @@
-name: Process and Convert AI List
+name: Merge AI Rules
 
 on:
   workflow_dispatch:
-
   schedule:
-    - cron: '0 22 * * *'
+    - cron: '0 1 * * *' # 每天凌晨 1 点 (UTC) 运行 (稍微错开整点)
 
 jobs:
-  download-and-process:
+  merge-rules:
     runs-on: ubuntu-latest
+
     steps:
-      # Step 1: Checkout repo
-      - name: Checkout Repository
-        uses: actions/checkout@v3
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-      # Step 2: Download list and save as *.yaml
-      - name: Download AI.list
-        run: |
-          curl -L "https://gitlab.com/lodepuly/vpn_tool/-/raw/master/Tool/Loon/Rule/AI.list" -o AI.yaml
+      - name: Install jq
+        run: sudo apt-get update && sudo apt-get install -y jq
 
-      # Step 3: Download sing-srs-converter
-      - name: Download sing-srs-converter
+      # --- Domain Rules ---
+      - name: Download Domain Source Files
         run: |
-          curl -L "https://github.com/PuerNya/sing-srs-converter/releases/download/v2.0.1/sing-srs-converter-v2.0.1-linux-x86_64" -o sing-srs-converter
-          chmod +x sing-srs-converter
+          echo "Downloading domain source files..."
+          # 使用 -f 来让 curl 在遇到 4xx/5xx 错误时返回非零退出码
+          # 使用 || true 来允许即使某个下载失败也继续执行（配合 continue-on-error）
+          curl -f -sSL -o domain_copilot.json https://raw.githubusercontent.com/Astlm/meta-rules-dat/sing/bm7/Copilot/domain.json || echo "Failed to download domain_copilot.json"
+          curl -f -sSL -o domain_gemini.json https://raw.githubusercontent.com/Astlm/meta-rules-dat/sing/bm7/Gemini/domain.json || echo "Failed to download domain_gemini.json"
+          curl -f -sSL -o domain_claude.json https://raw.githubusercontent.com/Astlm/meta-rules-dat/sing/bm7/Claude/domain.json || echo "Failed to download domain_claude.json"
+          curl -f -sSL -o domain_openai.json https://raw.githubusercontent.com/Astlm/meta-rules-dat/sing/bm7/OpenAI/domain.json || echo "Failed to download domain_openai.json"
+          curl -f -sSL -o domain_metacubex.json https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/sing/geo/geosite/category-ai-!cn.json || echo "Failed to download domain_metacubex.json"
+          curl -f -sSL -o domain_skk.json https://ruleset.skk.moe/sing-box/non_ip/ai.json || echo "Failed to download domain_skk.json"
+          echo "Domain source file download attempts finished."
+        # continue-on-error: true # 允许此步骤即使部分失败也继续
 
-      # Step 4: Filter and modify *.yaml
-      - name: Process yaml
+      - name: Merge Domain Rules
+        id: merge_domain
         run: |
-          sed -i 's/ //g' *.yaml
-          sed -i '/^.*IP-CIDR[^,]*,/ s/,no-resolve//' *.yaml
+          echo "Merging domain rules..."
+          # jq: 提取所有 domain/suffix/keyword/regex, 去重, 放入 {"rules": [{"domain": [...]}]} 结构
+          # 1. 提取所有相关字段的值到一个扁平数组中
+          # 2. 去重 (unique)
+          # 3. 将结果数组赋值给 .rules[0].domain
+          jq -s '
+            # 步骤1 & 2: 提取并去重
+            [ .[] | .rules? // [] | .[]? | (.domain? // []) + (.domain_suffix? // []) + (.domain_keyword? // []) + (.domain_regex? // []) ] | flatten | unique
+            # 步骤3: 构建最终结构
+            | if length > 0 then {"rules": [{"domain": .}]} else {"rules": []} end
+          ' domain_*.json > AI-Domain.json
 
-      # Step 5: Convert yaml using sing-srs-converter
-      - name: Convert yaml
-        run: |
-          ./sing-srs-converter *.yaml
+          # 检查生成的规则数量
+          DOMAIN_RULE_COUNT=$(jq '(.rules? | first | .domain? // []) | length' AI-Domain.json)
+          if [ "$DOMAIN_RULE_COUNT" -eq 0 ]; then
+            echo "::warning::Generated AI-Domain.json contains no domain rules."
+            echo "domain_rules_generated=false" >> $GITHUB_OUTPUT
+            # 如果需要，可以删除空文件或保留它
+            # rm -f AI-Domain.json # 如果想删除空文件
+          else
+            echo "Domain rules merged into AI-Domain.json"
+            echo "Total unique domain rules: $DOMAIN_RULE_COUNT"
+            echo "domain_rules_generated=true" >> $GITHUB_OUTPUT
+          fi
 
-      # Step 6: Commit and push changes
-      - name: Commit files
+
+      # --- IP Rules ---
+      - name: Download IP Source Files
         run: |
-          git config --local user.email "action@github.com"
-          git config --local user.name "GitHub Action"
-          git add .  # 修改这里，添加所有更改
-          git status  # 可选，打印状态以便调试
-          git commit -m "Update converted files" || echo "No changes to commit"  # 如果没有更改，则不会出错
-          git push
+          echo "Downloading IP source files..."
+          curl -f -sSL -o ip_copilot.json https://raw.githubusercontent.com/Astlm/meta-rules-dat/sing/bm7/Copilot/ipcidr.json || echo "Failed to download ip_copilot.json"
+          curl -f -sSL -o ip_openai.json https://raw.githubusercontent.com/Astlm/meta-rules-dat/sing/bm7/OpenAI/ipcidr.json || echo "Failed to download ip_openai.json"
+          echo "IP source file download attempts finished."
+        # continue-on-error: true # 允许此步骤即使部分失败也继续
+
+      - name: Merge IP Rules
+        id: merge_ip
+        run: |
+          echo "Merging IP rules..."
+          # jq: 提取所有 ip_cidr, 去重, 放入 {"rules": [{"ip_cidr": [...]}]} 结构
+          jq -s '
+            # 步骤1 & 2: 提取并去重
+            [ .[] | .rules? // [] | .[]? | .ip_cidr? // [] ] | flatten | unique
+            # 步骤3: 构建最终结构
+            | if length > 0 then {"rules": [{"ip_cidr": .}]} else {"rules": []} end
+          ' ip_*.json > AI-IP.json
+
+          # 检查生成的规则数量
+          IP_RULE_COUNT=$(jq '(.rules? | first | .ip_cidr? // []) | length' AI-IP.json)
+          if [ "$IP_RULE_COUNT" -eq 0 ]; then
+            echo "::warning::Generated AI-IP.json contains no IP rules."
+            echo "ip_rules_generated=false" >> $GITHUB_OUTPUT
+            # rm -f AI-IP.json # 如果想删除空文件
+          else
+            echo "IP rules merged into AI-IP.json"
+            echo "Total unique IP rules: $IP_RULE_COUNT"
+            echo "ip_rules_generated=true" >> $GITHUB_OUTPUT
+          fi
+
+      # --- Cleanup and Commit ---
+      - name: Clean up temporary files
+        if: always()
+        run: rm -f domain_*.json ip_*.json
+
+      - name: Commit changes
+        # 仅当成功生成了至少一个包含内容的规则文件时才提交
+        if: steps.merge_domain.outputs.domain_rules_generated == 'true' || steps.merge_ip.outputs.ip_rules_generated == 'true'
+        run: |
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+          git add AI-Domain.json AI-IP.json # 添加文件，即使某个文件是空的但另一个有内容
+          # 检查是否有实际更改（如果文件内容与上次提交相同，则不提交）
+          if git diff --staged --quiet; then
+            echo "No effective changes detected in rule files compared to the last commit."
+          else
+            git commit -m "Update AI ruleset (Automated)"
+            # 添加重试逻辑以防推送失败
+            git push || (sleep 5 && git push) || (sleep 10 && git push)
+            echo "Changes committed and potentially pushed."
+          fi
