@@ -3,7 +3,7 @@ name: Merge AI Rules
 on:
   workflow_dispatch:
   schedule:
-    - cron: '0 1 * * *' # 每天凌晨 1 点 (UTC) 运行
+    - cron: '0 2 * * *' # 每天凌晨 2 点 (UTC) 运行
 
 jobs:
   merge-rules:
@@ -20,6 +20,7 @@ jobs:
       - name: Download Domain Source Files
         run: |
           echo "Downloading domain source files..."
+          # ... (download commands remain the same) ...
           curl -f -sSL -o domain_copilot.json https://raw.githubusercontent.com/Astlm/meta-rules-dat/sing/bm7/Copilot/domain.json || echo "Failed to download domain_copilot.json"
           curl -f -sSL -o domain_gemini.json https://raw.githubusercontent.com/Astlm/meta-rules-dat/sing/bm7/Gemini/domain.json || echo "Failed to download domain_gemini.json"
           curl -f -sSL -o domain_claude.json https://raw.githubusercontent.com/Astlm/meta-rules-dat/sing/bm7/Claude/domain.json || echo "Failed to download domain_claude.json"
@@ -28,47 +29,58 @@ jobs:
           curl -f -sSL -o domain_skk.json https://ruleset.skk.moe/sing-box/non_ip/ai.json || echo "Failed to download domain_skk.json"
           echo "Domain source file download attempts finished."
 
-      - name: Merge Domain Rules
+      - name: Merge Domain Rules By Category
         id: merge_domain
         run: |
-          echo "Merging domain rules..."
-          # jq: 提取所有 domain/suffix/keyword/regex, 处理类型不匹配问题, 去重, 放入 {"rules": [{"domain": [...]}]} 结构
+          echo "Merging domain rules by category..."
+          # jq: 分别提取 domain, domain_suffix, domain_keyword, domain_regex
+          # 对每个类别进行去重，然后构建包含这些独立数组的规则对象
           jq -s '
-            # 定义一个函数，安全地将输入转换为数组
-            # 如果输入是数组，返回自身
-            # 如果输入是字符串，返回包含该字符串的单元素数组
-            # 否则（null, number, object, boolean），返回空数组
+            # 定义 ensure_array 函数 (保持不变)
             def ensure_array:
               if type == "array" then .
               elif type == "string" then [.]
               else []
               end;
 
-            # 步骤1 & 2: 提取、确保是数组、合并并去重
-            [
-              .[] | .rules? // [] | .[]? | # 遍历所有规则对象
-              # 对每个感兴趣的字段调用 ensure_array 函数后再合并
-              (.domain | ensure_array) +
-              (.domain_suffix | ensure_array) +
-              (.domain_keyword | ensure_array) +
-              (.domain_regex | ensure_array)
-            ] | flatten | unique
-            # 步骤3: 构建最终结构
-            | if length > 0 then {"rules": [{"domain": .}]} else {"rules": []} end
+            # 分别计算每个类别的唯一列表
+            ( [ .[] | .rules? // [] | .[]? | .domain | ensure_array ] | flatten | unique ) as $domains |
+            ( [ .[] | .rules? // [] | .[]? | .domain_suffix | ensure_array ] | flatten | unique ) as $suffixes |
+            ( [ .[] | .rules? // [] | .[]? | .domain_keyword | ensure_array ] | flatten | unique ) as $keywords |
+            ( [ .[] | .rules? // [] | .[]? | .domain_regex | ensure_array ] | flatten | unique ) as $regexes |
+
+            # 构建包含非空列表的规则对象
+            {
+              "domain": $domains,
+              "domain_suffix": $suffixes,
+              "domain_keyword": $keywords,
+              "domain_regex": $regexes
+            } |
+            # 移除值为空数组的键值对
+            map_values(select(length > 0)) |
+
+            # 检查结果对象是否为空，然后构建最终输出
+            if (.|length) > 0 then
+               {"rules": [.]} # 将包含非空数组的对象放入 rules 数组
+            else
+               {"rules": []} # 如果所有类别都为空，则输出空 rules 数组
+            end
           ' domain_*.json > AI-Domain.json
 
-          # 检查生成的规则数量 (保持不变)
-          DOMAIN_RULE_COUNT=$(jq '(.rules? | first | .domain? // []) | length' AI-Domain.json)
-          if [ "$DOMAIN_RULE_COUNT" -eq 0 ]; then
-            echo "::warning::Generated AI-Domain.json contains no domain rules."
+          # 检查生成的 rules 数组是否为空
+          DOMAIN_RULES_EXIST=$(jq '.rules | length > 0' AI-Domain.json)
+          if [ "$DOMAIN_RULES_EXIST" = "false" ]; then
+            echo "::warning::Generated AI-Domain.json contains no rules after merging categories."
             echo "domain_rules_generated=false" >> $GITHUB_OUTPUT
           else
-            echo "Domain rules merged into AI-Domain.json"
-            echo "Total unique domain rules: $DOMAIN_RULE_COUNT"
+            echo "Domain rules merged by category into AI-Domain.json"
+            # (可选) 显示每个类别的数量
+            jq '.rules[0] | to_entries | map("\(.key): \(.value | length) rules") | .[]' AI-Domain.json
             echo "domain_rules_generated=true" >> $GITHUB_OUTPUT
           fi
 
       # --- IP Rules ---
+      # (IP Rules 部分保持不变，因为它只处理一个类别 ip_cidr)
       - name: Download IP Source Files
         run: |
           echo "Downloading IP source files..."
@@ -80,34 +92,22 @@ jobs:
         id: merge_ip
         run: |
           echo "Merging IP rules..."
-          # jq: 提取所有 ip_cidr, 处理类型不匹配, 去重, 放入 {"rules": [{"ip_cidr": [...]}]} 结构
           jq -s '
-            # 复用 ensure_array 函数
-            def ensure_array:
-              if type == "array" then .
-              elif type == "string" then [.]
-              else []
-              end;
-
-            # 步骤1 & 2: 提取、确保是数组、合并并去重
-            [
-              .[] | .rules? // [] | .[]? | # 遍历所有规则对象
-              (.ip_cidr | ensure_array)     # 对 ip_cidr 字段调用 ensure_array
-            ] | flatten | unique
-            # 步骤3: 构建最终结构
+            def ensure_array: if type == "array" then . elif type == "string" then [.] else [] end;
+            [ .[] | .rules? // [] | .[]? | .ip_cidr | ensure_array ] | flatten | unique
             | if length > 0 then {"rules": [{"ip_cidr": .}]} else {"rules": []} end
           ' ip_*.json > AI-IP.json
 
-          # 检查生成的规则数量 (保持不变)
-          IP_RULE_COUNT=$(jq '(.rules? | first | .ip_cidr? // []) | length' AI-IP.json)
-          if [ "$IP_RULE_COUNT" -eq 0 ]; then
-            echo "::warning::Generated AI-IP.json contains no IP rules."
-            echo "ip_rules_generated=false" >> $GITHUB_OUTPUT
+          IP_RULES_EXIST=$(jq '.rules | length > 0' AI-IP.json)
+          if [ "$IP_RULES_EXIST" = "false" ]; then
+             echo "::warning::Generated AI-IP.json contains no IP rules."
+             echo "ip_rules_generated=false" >> $GITHUB_OUTPUT
           else
-            echo "IP rules merged into AI-IP.json"
-            echo "Total unique IP rules: $IP_RULE_COUNT"
-            echo "ip_rules_generated=true" >> $GITHUB_OUTPUT
+             echo "IP rules merged into AI-IP.json"
+             echo "Total unique IP rules: $(jq '.rules[0].ip_cidr | length' AI-IP.json)"
+             echo "ip_rules_generated=true" >> $GITHUB_OUTPUT
           fi
+
 
       # --- Cleanup and Commit ---
       - name: Clean up temporary files
@@ -123,8 +123,8 @@ jobs:
           if git diff --staged --quiet; then
             echo "No effective changes detected in rule files compared to the last commit."
           else
-            git commit -m "Update AI ruleset (Automated)"
-            # 使用简单的重试逻辑增加推送成功率
+            git commit -m "Update AI ruleset (Automated, categorized)" # 更新 commit 消息
+            # 推送重试逻辑 (保持不变)
             ATTEMPTS=0
             MAX_ATTEMPTS=3
             SUCCESS=false
@@ -140,6 +140,6 @@ jobs:
               echo "Changes committed and pushed."
             else
               echo "::error::Failed to push changes after $MAX_ATTEMPTS attempts."
-              exit 1 # 让工作流失败
+              exit 1
             fi
           fi
