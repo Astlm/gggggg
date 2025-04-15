@@ -135,5 +135,6 @@
         "^chatgpt-async-webps-prod-\\S+-\\d+\\.webpubsub\\.azure\\.com$"
       ]
     }
-  ]
+  ],
+  "version": 3
 }
