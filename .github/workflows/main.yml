@@ -3,7 +3,7 @@ name: Merge AI Rules
 on:
   workflow_dispatch:
   schedule:
-    - cron: '0 4 * * *' # 每天凌晨 4 点 (UTC) 运行
+    - cron: '0 4 * * *'
 
 jobs:
   merge-rules:
@@ -21,20 +21,17 @@ jobs:
         run: |
           echo "Downloading domain source files..."
           # ... (download commands remain the same) ...
-          curl -f -sSL -o domain_copilot.json https://raw.githubusercontent.com/Astlm/meta-rules-dat/sing/bm7/Copilot/domain.json || echo "Failed to download domain_copilot.json"
           curl -f -sSL -o domain_gemini.json https://raw.githubusercontent.com/Astlm/meta-rules-dat/sing/bm7/Gemini/domain.json || echo "Failed to download domain_gemini.json"
           curl -f -sSL -o domain_claude.json https://raw.githubusercontent.com/Astlm/meta-rules-dat/sing/bm7/Claude/domain.json || echo "Failed to download domain_claude.json"
           curl -f -sSL -o domain_openai.json https://raw.githubusercontent.com/Astlm/meta-rules-dat/sing/bm7/OpenAI/domain.json || echo "Failed to download domain_openai.json"
           curl -f -sSL -o domain_metacubex.json https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/sing/geo/geosite/category-ai-!cn.json || echo "Failed to download domain_metacubex.json"
-          curl -f -sSL -o domain_skk.json https://ruleset.skk.moe/sing-box/non_ip/ai.json || echo "Failed to download domain_skk.json"
           echo "Domain source file download attempts finished."
 
-      - name: Merge Domain Rules By Category (Enhanced Sing-box 1.9 Compatible Dedupe, Version 3 First)
+      - name: Merge Domain Rules
         id: merge_domain
         run: |
-          echo "Merging domain rules by category with enhanced Sing-box 1.9 compatible deduplication..."
+          echo "Merging domain rules..."
           jq -s '
-            # 定义 ensure_array 函数
             def ensure_array: if type == "array" then . elif type == "string" then [.] else [] end;
 
             # 步骤 1: 初步唯一列表
@@ -54,14 +51,11 @@ jobs:
             map_values(select(length > 0)) |
 
             # 步骤 5: 构建最终输出结构
-            # 先确定 rules 部分
             ( if (.|length) > 0 then {"rules": [.]} else {"rules": []} end ) as $rules_part |
-            # 然后将 rules 部分合并到 version 对象之后
             {"version": 2} + $rules_part
 
           ' domain_*.json > AI-Domain.json
 
-          # 检查和报告逻辑 (保持不变)
           DOMAIN_RULES_EXIST=$(jq '.rules | length > 0' AI-Domain.json)
           if [ "$DOMAIN_RULES_EXIST" = "false" ]; then
             echo "::warning::Generated AI-Domain.json contains no rules after merging categories."
@@ -76,7 +70,6 @@ jobs:
       - name: Download IP Source Files
         run: |
           echo "Downloading IP source files..."
-          curl -f -sSL -o ip_copilot.json https://raw.githubusercontent.com/Astlm/meta-rules-dat/sing/bm7/Copilot/ipcidr.json || echo "Failed to download ip_copilot.json"
           curl -f -sSL -o ip_openai.json https://raw.githubusercontent.com/Astlm/meta-rules-dat/sing/bm7/OpenAI/ipcidr.json || echo "Failed to download ip_openai.json"
           echo "IP source file download attempts finished."
 
@@ -87,12 +80,10 @@ jobs:
           jq -s '
             def ensure_array: if type == "array" then . elif type == "string" then [.] else [] end;
             [ .[] | .rules? // [] | .[]? | .ip_cidr | ensure_array ] | flatten | unique
-            # 构建最终输出结构 (version 在前)
             | ( if length > 0 then {"rules": [{"ip_cidr": .}]} else {"rules": []} end ) as $rules_part |
-            {"version": 2} + $rules_part # 将 rules 部分合并到 version 对象之后
+            {"version": 2} + $rules_part
           ' ip_*.json > AI-IP.json
 
-          # 检查和报告逻辑 (保持不变)
           IP_RULES_EXIST=$(jq '.rules | length > 0' AI-IP.json)
           if [ "$IP_RULES_EXIST" = "false" ]; then
              echo "::warning::Generated AI-IP.json contains no IP rules."
