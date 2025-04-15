@@ -3,7 +3,7 @@ name: Merge AI Rules
 on:
   workflow_dispatch:
   schedule:
-    - cron: '0 2 * * *' # 每天凌晨 2 点 (UTC) 运行
+    - cron: '0 3 * * *' # 每天凌晨 3 点 (UTC) 运行
 
 jobs:
   merge-rules:
@@ -29,12 +29,14 @@ jobs:
           curl -f -sSL -o domain_skk.json https://ruleset.skk.moe/sing-box/non_ip/ai.json || echo "Failed to download domain_skk.json"
           echo "Domain source file download attempts finished."
 
-      - name: Merge Domain Rules By Category
+      - name: Merge Domain Rules By Category (Sing-box 1.9 Compatible Dedupe)
         id: merge_domain
         run: |
-          echo "Merging domain rules by category..."
-          # jq: 分别提取 domain, domain_suffix, domain_keyword, domain_regex
-          # 对每个类别进行去重，然后构建包含这些独立数组的规则对象
+          echo "Merging domain rules by category with Sing-box 1.9 compatible deduplication..."
+          # jq:
+          # 1. 分别提取和初步去重 domain, domain_suffix, domain_keyword, domain_regex
+          # 2. 执行特殊去重：如果 domain 列表中的某项也存在于 domain_suffix 列表中（且不以 . 开头），则从 domain 列表中移除该项
+          # 3. 构建最终的规则对象
           jq -s '
             # 定义 ensure_array 函数 (保持不变)
             def ensure_array:
@@ -43,44 +45,49 @@ jobs:
               else []
               end;
 
-            # 分别计算每个类别的唯一列表
-            ( [ .[] | .rules? // [] | .[]? | .domain | ensure_array ] | flatten | unique ) as $domains |
-            ( [ .[] | .rules? // [] | .[]? | .domain_suffix | ensure_array ] | flatten | unique ) as $suffixes |
-            ( [ .[] | .rules? // [] | .[]? | .domain_keyword | ensure_array ] | flatten | unique ) as $keywords |
-            ( [ .[] | .rules? // [] | .[]? | .domain_regex | ensure_array ] | flatten | unique ) as $regexes |
+            # 步骤 1: 分别计算每个类别的初步唯一列表
+            ( [ .[] | .rules? // [] | .[]? | .domain | ensure_array ] | flatten | unique ) as $domains_initial |
+            ( [ .[] | .rules? // [] | .[]? | .domain_suffix | ensure_array ] | flatten | unique ) as $suffixes_final | # suffix 列表不再变动，直接用 final
+            ( [ .[] | .rules? // [] | .[]? | .domain_keyword | ensure_array ] | flatten | unique ) as $keywords_final | # keyword 列表也不再变动
+            ( [ .[] | .rules? // [] | .[]? | .domain_regex | ensure_array ] | flatten | unique ) as $regexes_final | # regex 列表也不再变动
 
-            # 构建包含非空列表的规则对象
+            # 步骤 2: 执行特殊去重，生成最终的 domain 列表
+            # 过滤 $domains_initial, 只保留那些在 $suffixes_final 中不存在的项
+            # ($suffixes_final | index($d)) 会查找 $d 在 $suffixes_final 中的索引，如果不存在则返回 null
+            # `not` 将 null 变成 true (保留), 将数字索引变成 false (移除)
+            ( $domains_initial | map(select(. as $d | ($suffixes_final | index($d) | not) )) ) as $domains_final |
+
+            # 步骤 3: 构建包含非空列表的规则对象
             {
-              "domain": $domains,
-              "domain_suffix": $suffixes,
-              "domain_keyword": $keywords,
-              "domain_regex": $regexes
+              "domain": $domains_final,
+              "domain_suffix": $suffixes_final,
+              "domain_keyword": $keywords_final,
+              "domain_regex": $regexes_final
             } |
-            # 移除值为空数组的键值对
+            # 移除值为空数组的键值对 (保持不变)
             map_values(select(length > 0)) |
 
-            # 检查结果对象是否为空，然后构建最终输出
+            # 检查结果对象是否为空，然后构建最终输出 (保持不变)
             if (.|length) > 0 then
-               {"rules": [.]} # 将包含非空数组的对象放入 rules 数组
+               {"rules": [.]}
             else
-               {"rules": []} # 如果所有类别都为空，则输出空 rules 数组
+               {"rules": []}
             end
           ' domain_*.json > AI-Domain.json
 
-          # 检查生成的 rules 数组是否为空
+          # 检查和报告逻辑 (保持不变)
           DOMAIN_RULES_EXIST=$(jq '.rules | length > 0' AI-Domain.json)
           if [ "$DOMAIN_RULES_EXIST" = "false" ]; then
             echo "::warning::Generated AI-Domain.json contains no rules after merging categories."
             echo "domain_rules_generated=false" >> $GITHUB_OUTPUT
           else
-            echo "Domain rules merged by category into AI-Domain.json"
-            # (可选) 显示每个类别的数量
+            echo "Domain rules merged by category into AI-Domain.json (Sing-box 1.9+ dedupe applied)"
             jq '.rules[0] | to_entries | map("\(.key): \(.value | length) rules") | .[]' AI-Domain.json
             echo "domain_rules_generated=true" >> $GITHUB_OUTPUT
           fi
 
       # --- IP Rules ---
-      # (IP Rules 部分保持不变，因为它只处理一个类别 ip_cidr)
+      # (IP Rules 部分保持不变)
       - name: Download IP Source Files
         run: |
           echo "Downloading IP source files..."
@@ -110,6 +117,7 @@ jobs:
 
 
       # --- Cleanup and Commit ---
+      # (Cleanup and Commit 部分保持不变, 除了 commit message 可以微调)
       - name: Clean up temporary files
         if: always()
         run: rm -f domain_*.json ip_*.json
@@ -123,7 +131,8 @@ jobs:
           if git diff --staged --quiet; then
             echo "No effective changes detected in rule files compared to the last commit."
           else
-            git commit -m "Update AI ruleset (Automated, categorized)" # 更新 commit 消息
+            # 更新 commit 消息以反映新的去重逻辑
+            git commit -m "Update AI ruleset (Automated, categorized, Sing-box 1.9+ dedupe)"
             # 推送重试逻辑 (保持不变)
             ATTEMPTS=0
             MAX_ATTEMPTS=3
