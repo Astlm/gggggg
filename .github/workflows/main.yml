@@ -29,7 +29,7 @@ jobs:
           curl -f -sSL -o domain_skk.json https://ruleset.skk.moe/sing-box/non_ip/ai.json || echo "Failed to download domain_skk.json"
           echo "Domain source file download attempts finished."
 
-      - name: Merge Domain Rules By Category (Enhanced Sing-box 1.9 Compatible Dedupe, Version 3)
+      - name: Merge Domain Rules By Category (Enhanced Sing-box 1.9 Compatible Dedupe, Version 3 First)
         id: merge_domain
         run: |
           echo "Merging domain rules by category with enhanced Sing-box 1.9 compatible deduplication..."
@@ -53,8 +53,11 @@ jobs:
             { "domain": $domains_final, "domain_suffix": $suffixes_final, "domain_keyword": $keywords_final, "domain_regex": $regexes_final } |
             map_values(select(length > 0)) |
 
-            # 步骤 5: 构建最终输出结构 (包含 version 和 rules)
-            ( if (.|length) > 0 then {"rules": [.]} else {"rules": []} end ) + {"version": 3} # <-- 在这里添加版本号
+            # 步骤 5: 构建最终输出结构 (version 在前)
+            # 先确定 rules 部分
+            ( if (.|length) > 0 then {"rules": [.]} else {"rules": []} end ) as $rules_part |
+            # 然后将 rules 部分合并到 version 对象之后
+            {"version": 3} + $rules_part
 
           ' domain_*.json > AI-Domain.json
 
@@ -77,15 +80,16 @@ jobs:
           curl -f -sSL -o ip_openai.json https://raw.githubusercontent.com/Astlm/meta-rules-dat/sing/bm7/OpenAI/ipcidr.json || echo "Failed to download ip_openai.json"
           echo "IP source file download attempts finished."
 
-      - name: Merge IP Rules (Version 3)
+      - name: Merge IP Rules (Version 3 First)
         id: merge_ip
         run: |
           echo "Merging IP rules..."
           jq -s '
             def ensure_array: if type == "array" then . elif type == "string" then [.] else [] end;
             [ .[] | .rules? // [] | .[]? | .ip_cidr | ensure_array ] | flatten | unique
-            # 构建最终输出结构 (包含 version 和 rules)
-            | ( if length > 0 then {"rules": [{"ip_cidr": .}]} else {"rules": []} end ) + {"version": 3} # <-- 在这里添加版本号
+            # 构建最终输出结构 (version 在前)
+            | ( if length > 0 then {"rules": [{"ip_cidr": .}]} else {"rules": []} end ) as $rules_part |
+            {"version": 3} + $rules_part # 将 rules 部分合并到 version 对象之后
           ' ip_*.json > AI-IP.json
 
           # 检查和报告逻辑 (保持不变)
