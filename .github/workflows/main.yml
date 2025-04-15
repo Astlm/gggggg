@@ -75,11 +75,11 @@ jobs:
               )
             ) as $domains_final |
 
-            # 步骤 5: 构建包含非空列表的规则对象 (version 在前)
+            # 步骤 5: 构建包含非空列表的规则对象
             { "domain": $domains_final, "domain_suffix": $suffixes_final, "domain_keyword": $keywords_final, "domain_regex": $regexes_final } |
             map_values(select(length > 0)) |
             ( if (.|length) > 0 then {"rules": [.]} else {"rules": []} end ) as $rules_part |
-            {"version": 3} + $rules_part
+            {"version": 2} + $rules_part
 
           ' domain_*.json > AI-Domain.json
 
@@ -102,7 +102,7 @@ jobs:
           curl -f -sSL -o ip_openai.json https://raw.githubusercontent.com/Astlm/meta-rules-dat/sing/bm7/OpenAI/ipcidr.json || echo "Failed to download ip_openai.json"
           echo "IP source file download attempts finished."
 
-      - name: Merge IP Rules (Version 3 First)
+      - name: Merge IP Rules
         id: merge_ip
         run: |
           echo "Merging IP rules..."
@@ -110,7 +110,7 @@ jobs:
             def ensure_array: if type == "array" then . elif type == "string" then [.] else [] end;
             [ .[] | .rules? // [] | .[]? | .ip_cidr | ensure_array ] | flatten | unique
             | ( if length > 0 then {"rules": [{"ip_cidr": .}]} else {"rules": []} end ) as $rules_part |
-            {"version": 3} + $rules_part
+            {"version": 2} + $rules_part
           ' ip_*.json > AI-IP.json
 
           IP_RULES_EXIST=$(jq '.rules | length > 0' AI-IP.json)
