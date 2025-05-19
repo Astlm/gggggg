@@ -15,7 +15,8 @@
         "pplx-res.cloudinary.com",
         "production-openaicom-storage.azureedge.net",
         "servd-anthropic-website.b-cdn.net",
-        "static.cloudflareinsights.com"
+        "static.cloudflareinsights.com",
+        "webchannel-alkalimakersuite-pa.clients6.google.com"
       ],
       "domain_suffix": [
         "ai.com",
@@ -23,7 +24,6 @@
         "algolia.net",
         "anthropic.com",
         "api.statsig.com",
-        "apis.google.com",
         "auth0.com",
         "bard.google.com",
         "chat.com",
@@ -34,6 +34,8 @@
         "claudeusercontent.com",
         "client-api.arkoselabs.com",
         "clipdrop.co",
+        "coderabbit.ai",
+        "coderabbit.gallery.vsassets.io",
         "cursor-cdn.com",
         "cursor.com",
         "cursor.sh",
@@ -86,9 +88,6 @@
         "x.ai"
       ],
       "domain_keyword": [
-        "colab",
-        "developerprofiles",
-        "generativelanguage",
         "openai"
       ],
       "domain_regex": [
