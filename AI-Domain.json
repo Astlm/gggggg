@@ -24,6 +24,7 @@
         "algolia.net",
         "anthropic.com",
         "api.statsig.com",
+        "apis.google.com",
         "auth0.com",
         "bard.google.com",
         "chat.com",
@@ -88,6 +89,9 @@
         "x.ai"
       ],
       "domain_keyword": [
+        "colab",
+        "developerprofiles",
+        "generativelanguage",
         "openai"
       ],
       "domain_regex": [
