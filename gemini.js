@@ -76,7 +76,7 @@ async function operator(proxies = [], targetPlatform, context) {
         if (remove_incompatible || $arguments.incompatible) {
              proxies[index]._incompatible = true;
         }
-        $.warn(`节点 ${proxy.name} (${proxy.type}) 无法转换为内部格式，可能不被 HTTP META 支持。`);
+        $.error(`节点 ${proxy.name} (${proxy.type}) 无法转换为内部格式，可能不被 HTTP META 支持。`);
       }
     } catch (e) {
       $.error(`处理节点 ${proxy.name} 时出错: ${e.message}`);
@@ -265,10 +265,10 @@ async function operator(proxies = [], targetPlatform, context) {
                  isAccessible = true;
                  $.info(`[${proxyName}] 检测成功: 可访问 Gemini (Status: ${status}, Found String)`);
              } else {
-                 $.warn(`[${proxyName}] 检测失败: 响应体未包含特征字符串 (Status: ${status})`);
+                 $.error(`[${proxyName}] 检测失败: 响应体未包含特征字符串 (Status: ${status})`);
              }
         } else {
-            $.warn(`[${proxyName}] 检测失败: 请求状态码异常 (Status: ${status})`);
+            $.error(`[${proxyName}] 检测失败: 请求状态码异常 (Status: ${status})`);
         }
 
         // 设置缓存
@@ -331,7 +331,7 @@ async function operator(proxies = [], targetPlatform, context) {
           if (count < RETRIES) {
             count++;
             const delay = RETRY_DELAY * count;
-            $.warn(`请求 ${opt.url} 失败 (第 ${count} 次重试): ${e.message || e}, ${delay / 1000} 秒后重试...`);
+            $.error(`请求 ${opt.url} 失败 (第 ${count} 次重试): ${e.message || e}, ${delay / 1000} 秒后重试...`);
             await $.wait(delay);
             return await fn();
           } else {

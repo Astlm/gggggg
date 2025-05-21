@@ -76,7 +76,7 @@ async function operator(proxies = [], targetPlatform, context) {
         if (remove_incompatible || $arguments.incompatible) {
              proxies[index]._incompatible = true;
         }
-        $.warn(`节点 ${proxy.name} (${proxy.type}) 无法转换为内部格式，可能不被 HTTP META 支持。`);
+        $.error(`节点 ${proxy.name} (${proxy.type}) 无法转换为内部格式，可能不被 HTTP META 支持。`);
       }
     } catch (e) {
       $.error(`处理节点 ${proxy.name} 时出错: ${e.message}`);
@@ -264,7 +264,7 @@ async function operator(proxies = [], targetPlatform, context) {
             }
             return { index: originalIndex, ip: ip };
         } else {
-            $.warn(`[${proxyName}] IP 检测失败。状态码: ${status}, 响应: "${ip}"`);
+            $.error(`[${proxyName}] IP 检测失败。状态码: ${status}, 响应: "${ip}"`);
             if (cacheEnabled) {
                 $.log(`[${proxyName}] 设置失败缓存`);
                 cache.set(cacheId, {}); 
@@ -296,7 +296,7 @@ async function operator(proxies = [], targetPlatform, context) {
         if (count < RETRIES) {
           count++;
           const delay = RETRY_DELAY * count; 
-          $.warn(`请求 ${opt.url} 失败 (第 ${count} 次重试): ${e.message || e}, ${delay / 1000} 秒后重试...`);
+          $.error(`请求 ${opt.url} 失败 (第 ${count} 次重试): ${e.message || e}, ${delay / 1000} 秒后重试...`);
           await $.wait(delay);
           return await fn(); 
         } else {
