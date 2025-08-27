@@ -20,6 +20,7 @@
       ],
       "domain_suffix": [
         "ai.com",
+        "aisandbox-pa.googleapis.com",
         "aistudio.google.com",
         "algolia.net",
         "anthropic.com",
@@ -64,6 +65,7 @@
         "jasper.ai",
         "jules.google",
         "jules.google.com",
+        "labs.google",
         "launchdarkly.com",
         "makersuite.google.com",
         "meta.ai",
@@ -80,6 +82,7 @@
         "openart.ai",
         "openrouter.ai",
         "perplexity.ai",
+        "perplexity.com",
         "poe.com",
         "poecdn.net",
         "pplx.ai",
