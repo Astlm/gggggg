@@ -100,6 +100,8 @@
         "labs.google",
         "labs.google.com",
         "launchdarkly.com",
+        "liveperson.net",
+        "lpsnmedia.net",
         "makersuite.google.com",
         "marscode.com",
         "meta.ai",
@@ -131,7 +133,10 @@
         "stripe.com",
         "trae.ai",
         "turn.livekit.cloud",
-        "x.ai"
+        "x.ai",
+        "youmind.ai",
+        "youmind.com",
+        "youmind.site"
       ],
       "domain_keyword": [
         "colab",
