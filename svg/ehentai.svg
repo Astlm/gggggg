@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <g stroke="#660611" stroke-width="2.5" stroke-linecap="round" fill="none">
+    <!-- E: vertical | top — mid — bottom -->
+    <line x1="5.25" y1="7.25"  x2="5.25"  y2="24.75"/>
+    <line x1="5.25" y1="7.25"  x2="12.25" y2="7.25"/>
+    <line x1="5.25" y1="16"    x2="10.25" y2="16"/>
+    <line x1="5.25" y1="24.75" x2="12.25" y2="24.75"/>
+    <!-- H: left | right | crossbar -->
+    <line x1="19.75" y1="7.25"  x2="19.75" y2="24.75"/>
+    <line x1="26.75" y1="7.25"  x2="26.75" y2="24.75"/>
+    <line x1="19.75" y1="16"    x2="26.75" y2="16"/>
+  </g>
+  <!-- · -->
+  <circle cx="16" cy="16" r="1.5" fill="#660611"/>
+</svg>
