@@ -9,7 +9,7 @@
   </defs>
 
   <g transform="scale(.25)">
-  <rect width="512" height="512" fill="url(#background)"/>
+  <circle cx="256" cy="256" r="256" fill="url(#background)"/>
 
   <path fill="#FAFAFB" d="M76 170h360v203c0 19.3-15.7 35-35 35H111c-19.3 0-35-15.7-35-35V170Z"/>
   <path fill="#FAFAFB" d="m76 170 15.3-36.7c2.7-6.4 8.5-10.8 15.4-11.6l135.8-16.8c3.9-.5 6.8 3.4 5.3 7l-12.4 31.8a13 13 0 0 1-10.4 8.1L76 170Z"/>
