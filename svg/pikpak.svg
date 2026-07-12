@@ -11,6 +11,7 @@
   <g transform="scale(.25)">
   <circle cx="256" cy="256" r="256" fill="url(#background)"/>
 
+  <g transform="translate(256 256) scale(.85) translate(-256 -256)">
   <path fill="#FAFAFB" d="M76 170h360v203c0 19.3-15.7 35-35 35H111c-19.3 0-35-15.7-35-35V170Z"/>
   <path fill="#FAFAFB" d="m76 170 15.3-36.7c2.7-6.4 8.5-10.8 15.4-11.6l135.8-16.8c3.9-.5 6.8 3.4 5.3 7l-12.4 31.8a13 13 0 0 1-10.4 8.1L76 170Z"/>
   <path fill="#FAFAFB" d="m436 170-15.3-36.7a19 19 0 0 0-15.4-11.6l-135.8-16.8c-3.9-.5-6.8 3.4-5.3 7l12.4 31.8a13 13 0 0 0 10.4 8.1L436 170Z"/>
@@ -18,5 +19,6 @@
   <rect x="176" y="232" width="32" height="64" rx="16" fill="#566FEF"/>
   <rect x="304" y="232" width="32" height="64" rx="16" fill="#566FEF"/>
   <path d="M215.5 347.3c24.7 13.7 56.3 13.7 81 0" fill="none" stroke="#566FEF" stroke-width="19" stroke-linecap="round"/>
+  </g>
   </g>
 </svg>
