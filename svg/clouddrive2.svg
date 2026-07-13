@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128" role="img" aria-labelledby="title desc">
+  <title id="title">CloudDrive2 color icon</title>
+  <desc id="desc">Vector recreation based on the official CloudDrive2 application artwork.</desc>
+  <defs>
+    <linearGradient id="background" x1="0" y1="128" x2="128" y2="0" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#3BA1DE"/>
+      <stop offset="1" stop-color="#1D7FBA"/>
+    </linearGradient>
+  </defs>
+
+  <circle cx="64" cy="64" r="64" fill="url(#background)"/>
+  <path fill="#FFF" d="M47.4 31h49.2v49.2H69.2V58.4H47.4Z"/>
+  <path fill="#FFF" d="M31 63.6h32.8v33H31Z"/>
+</svg>
