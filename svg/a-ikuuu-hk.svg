@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128" role="img" aria-label="A-ikuuu-HK">
+  <title>A-ikuuu-HK</title>
+  <desc>ikuuu baby chick with automatic-test badge and Hong Kong flag.</desc>
+  <rect width="128" height="128" rx="24" fill="none" />
+  <svg x="8" y="8" width="86" height="86" viewBox="0 0 36 36" preserveAspectRatio="xMidYMid meet">
+    <path fill="#f4900c" d="M8.512 15.93c0 1.657 1.974 2-.512 2s-6-1-6-2s1.526-3 4.012-3s2.5 1.343 2.5 3" />
+    <path fill="#ffac33" d="M27.88 33.027a1 1 0 0 0-.418-.391C25.865 30.931 27 28.93 27 28.93c0-.553 1-2 0-2l-1 1c-1 1-1 4-1 4h-2a1 1 0 1 0 0 2h1.107l-.222.12a1 1 0 1 0 .952 1.759l2.639-1.427a1 1 0 0 0 .404-1.355m-7 0a1 1 0 0 0-.418-.391C18.865 30.931 20 28.93 20 28.93c0-.553 1-2 0-2l-1 1c-1 1-1 4-1 4h-2a1 1 0 1 0 0 2h1.108l-.222.12a1 1 0 1 0 .952 1.759l2.639-1.427a1 1 0 0 0 .403-1.355" />
+    <path fill="#ffcc4d" d="M35.217 17.305c-1.342 0-7.904 4.613-11.553-5.375l-.018-.038a9.5 9.5 0 0 0-7.367-6.789l-.037-.042C18.389 3.684 19 4.707 19 3.93c0-1.179-2.083-1.303-4 .012c-1.917-1.315-4-1.191-4-.012c0 .761.583-.208 2.623 1.044C8.788 5.417 5 9.479 5 14.43c0 4.478 3.103 8.223 7.273 9.227c1.003 4.171 4.748 7.273 9.227 7.273c3.953 0 6.934-1.678 8.99-3.999c.555-.626.111.602.842.235c4.24-2.132 5.168-9.861 3.885-9.861" />
+    <circle cx="12.5" cy="13.43" r="1.5" fill="#662113" />
+    <path fill="#ffac33" d="M21.81 15.93s-2 10 10 10c1 0 0 2-4 2s-9.999-5-7-11c.633-1.265 1-1 1-1" />
+  </svg>
+  <circle cx="96" cy="96" r="27" fill="#fff" stroke="#0f172a" stroke-width="2" stroke-opacity="0.18" />
+  <svg x="76" y="76" width="40" height="40" viewBox="0 0 512 512" preserveAspectRatio="xMidYMid meet">
+    <mask id="a-ikuuu-hk-flag-mask">
+      <circle cx="256" cy="256" r="256" fill="#fff" />
+    </mask>
+    <g mask="url(#a-ikuuu-hk-flag-mask)">
+      <path fill="#d80027" d="M0 0h512v512H0z" />
+      <path fill="#eee" d="M282.4 193.7c-5.8 24.2-16.1 19.6-21.2 40.7a55.7 55.7 0 0 1 26-108.3c-10.1 42.2.4 46-4.8 67.6M205 211.6c21.2 13 13.6 21.4 32.1 32.8a55.7 55.7 0 0 1-94.9-58.2c37 22.7 43.8 13.8 62.8 25.4m-7 79.3c19-16.2 24.7-6.4 41.2-20.4a55.7 55.7 0 0 1-84.7 72.2c33-28.2 26.6-37.4 43.6-51.8zm73.4 31c-9.6-23 1.5-25.3-6.8-45.3a55.7 55.7 0 0 1 42.6 102.8c-16.6-40-27.3-36.9-35.8-57.4zm52.2-60c-24.9 2-23.7-9.3-45.3-7.6a55.7 55.7 0 0 1 111-8.7c-43.3 3.4-43.6 14.5-65.7 16.3" />
+    </g>
+  </svg>
+  <circle cx="102" cy="26" r="20.5" fill="#fff" stroke="#0f172a" stroke-width="2" stroke-opacity="0.18" />
+  <svg x="88" y="12" width="28" height="28" viewBox="0 0 32 32" preserveAspectRatio="xMidYMid meet">
+    <g fill="none">
+      <path fill="#1345B7" d="M2.002 13.648L2 13.5a6.5 6.5 0 0 1 6.132-6.49a4.042 4.042 0 0 1 6.325-2.208A8.95 8.95 0 0 1 20.97 2c4.33 0 7.945 3.07 8.786 7.151q.242.861.244 1.849c0 5-4.306 9-9 9H8.5a6.5 6.5 0 0 1-2.733-.6C3.54 18.4 2 16.263 2 13.786l.002-.14" />
+      <path fill="#FF6723" d="m19.128 20.609l-4.387 7.178c-.21.345-.741.195-.741-.209V22.4a.4.4 0 0 0-.4-.4h-1.853a.4.4 0 0 1-.332-.622l4.852-7.279a.4.4 0 0 1 .733.222V19.6c0 .22.18.4.4.4h1.387a.4.4 0 0 1 .341.609" />
+    </g>
+  </svg>
+  <metadata>{"composition": "https://raw.githubusercontent.com/Astlm/gggggg/refs/heads/main/svg/a-aws-sg.svg", "chick": "https://api.iconify.design/twemoji/baby-chick.svg", "region": "https://api.iconify.design/circle-flags/hk.svg"}</metadata>
+</svg>
